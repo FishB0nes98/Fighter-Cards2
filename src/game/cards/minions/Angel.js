@@ -8,7 +8,7 @@ export const Angel = {
     baseHealth: 8,
     attributes: ['God', 'Healer'],
     description: 'When summoned: Deal 4 damage to all enemies.',
-    imageUrl: '/images/cards/angel.png',
+    imageUrl: 'images/cards/angel.png',
 
     battlecry: (gameState) => {
         let newState = { ...gameState };

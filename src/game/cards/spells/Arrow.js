@@ -4,7 +4,7 @@ export const Arrow = {
     type: 'SPELL',
     manaCost: 1,
     description: 'Deal 1 damage to a minion.',
-    imageUrl: '/images/cards/arrow.png',
+    imageUrl: 'images/cards/arrow.png',
     requiresTarget: true,
 
     canTarget: (gameState, targetInfo) => {

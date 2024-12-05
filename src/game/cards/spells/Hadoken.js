@@ -4,7 +4,7 @@ export const Hadoken = {
     type: 'SPELL',
     manaCost: 1,
     description: 'Deal 2 damage to a minion.',
-    imageUrl: '/images/cards/hadoken.png',
+    imageUrl: 'images/cards/hadoken.png',
     requiresTarget: true,
 
     canTarget: (gameState, targetInfo) => {

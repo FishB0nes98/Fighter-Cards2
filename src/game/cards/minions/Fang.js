@@ -10,7 +10,7 @@ export const Fang = {
     baseHealth: 4,
     attributes: ['Healer'],
     description: 'At the start of your turn, create a Health Potion in your hand (costs 1 less).',
-    imageUrl: '/images/cards/fang.png',
+    imageUrl: 'images/cards/fang.png',
 
     onTurnStart: (gameState, index, playerType) => {
         const newState = { ...gameState };

@@ -10,7 +10,7 @@ export const PrimalKagome = {
     baseHealth: 4,
     attributes: ['Primal', 'Hunter'],
     description: 'At the end of your turn, create an Arrow spell in your hand.',
-    imageUrl: '/images/cards/primal_kagome.png',
+    imageUrl: 'images/cards/primal_kagome.png',
     onTurnEnd: (gameState, index, playerType) => {
         const newState = { ...gameState };
         // Only create Arrow if it's the owner's turn end

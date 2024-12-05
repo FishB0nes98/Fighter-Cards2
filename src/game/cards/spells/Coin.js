@@ -4,7 +4,7 @@ export const Coin = {
     type: 'SPELL',
     manaCost: 2,
     description: 'Double a minion\'s attack this turn.',
-    imageUrl: '/images/cards/coin.png',
+    imageUrl: 'images/cards/coin.png',
     requiresTarget: true,
 
     canTarget: (gameState, targetInfo) => {

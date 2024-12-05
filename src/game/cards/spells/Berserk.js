@@ -4,7 +4,7 @@ export const Berserk = {
     type: 'SPELL',
     manaCost: 4,
     description: 'Give all allied minions +3 attack this turn.',
-    imageUrl: '/images/cards/berserk.png',
+    imageUrl: 'images/cards/berserk.png',
     requiresTarget: false,
 
     effect: (gameState, targetInfo) => {

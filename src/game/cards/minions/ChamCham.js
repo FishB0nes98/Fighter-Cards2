@@ -9,7 +9,7 @@ export const ChamCham = {
     baseAttack: 4,
     attributes: ['Beast'],
     description: 'Can attack twice each turn.',
-    imageUrl: '/images/cards/cham_cham.png',
+    imageUrl: 'images/cards/cham_cham.png',
     attacksThisTurn: 0,
     maxAttacksPerTurn: 2,
 

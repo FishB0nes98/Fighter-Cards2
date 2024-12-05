@@ -11,7 +11,7 @@ export const ErronBlack = {
     baseAttack: 3,
     attributes: ['Hunter'],
     description: 'At the start of your turn, 20% chance to create a Coin card in your hand.',
-    imageUrl: '/images/cards/erron_black.png',
+    imageUrl: 'images/cards/erron_black.png',
 
     onTurnStart: function(gameState, index, playerType) {
         const newState = { ...gameState };

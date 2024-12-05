@@ -8,7 +8,7 @@ export const SubZero = {
     baseHealth: 4,
     attributes: ['Ninja', 'Caster'],
     description: 'Freezes a minion for 4 turns when played.',
-    imageUrl: '/images/cards/sub_zero.png',
+    imageUrl: 'images/cards/sub_zero.png',
     battlecry: (gameState, index) => {
         const newState = { ...gameState };
         

@@ -4,7 +4,7 @@ export const Weaken = {
     type: 'SPELL',
     manaCost: 2,
     description: 'Reduce a minion\'s attack by 2.',
-    imageUrl: '/images/cards/weaken.png',
+    imageUrl: 'images/cards/weaken.png',
     requiresTarget: true,
 
     canTarget: (gameState, targetInfo) => {

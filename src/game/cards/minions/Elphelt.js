@@ -8,7 +8,7 @@ export const Elphelt = {
     baseHealth: 5,
     attributes: ['Love', 'Hunter'],
     description: 'Whenever she damages a card or is damaged by a card, reduces its attack by 2.',
-    imageUrl: '/images/cards/elphelt.png',
+    imageUrl: 'images/cards/elphelt.png',
 
     // When Elphelt attacks
     onAttack: (gameState, index, playerType) => {

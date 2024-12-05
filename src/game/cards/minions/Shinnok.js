@@ -8,7 +8,7 @@ export const Shinnok = {
     baseHealth: 7,
     attributes: ['Demon', 'Caster', 'God'],
     description: 'Whenever a spell is played while Shinnok is on the field, deal 1 damage to a random enemy minion.',
-    imageUrl: '/images/cards/shinnok.png',
+    imageUrl: 'images/cards/shinnok.png',
 
     // Called when any spell is played
     onSpellPlayed: (gameState, index, playerType) => {

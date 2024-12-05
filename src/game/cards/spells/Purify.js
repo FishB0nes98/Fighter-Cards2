@@ -6,7 +6,7 @@ export const Purify = {
     type: 'SPELL',
     manaCost: 4,
     description: 'Remove all buffs and effects from a target card, restoring it to its base state (except HP loss)',
-    imageUrl: '/images/cards/purify.png',
+    imageUrl: 'images/cards/purify.png',
     requiresTarget: true,
     canTarget: (gameState, targetInfo) => {
         if (!targetInfo?.playerType || targetInfo?.index === undefined) return false;

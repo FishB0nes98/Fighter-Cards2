@@ -8,7 +8,7 @@ export const Panda = {
     baseHealth: 5,
     attributes: ['Primal', 'Beast'],
     description: 'While Panda is on the field, all allies gain +2 max HP (aura).',
-    imageUrl: '/images/cards/panda.png',
+    imageUrl: 'images/cards/panda.png',
 
     onPlay: (gameState, index, playerType) => {
         const newState = { ...gameState };

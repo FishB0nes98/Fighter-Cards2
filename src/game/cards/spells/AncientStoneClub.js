@@ -4,7 +4,7 @@ export const AncientStoneClub = {
     type: 'SPELL',
     manaCost: 2,
     description: 'Give all Primal minions +2 attack permanently.',
-    imageUrl: '/images/cards/ancient_stone_club.png',
+    imageUrl: 'images/cards/ancient_stone_club.png',
     effect: (gameState) => {
         let newState = { ...gameState };
         const currentPlayer = newState.players[newState.currentTurn];

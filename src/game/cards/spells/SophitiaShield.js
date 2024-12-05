@@ -4,7 +4,7 @@ export const SophitiaShield = {
     type: 'SPELL',
     manaCost: 0,
     description: 'Give a minion +1 health.',
-    imageUrl: '/images/cards/Sophitia Shield.webp',
+    imageUrl: 'images/cards/Sophitia Shield.webp',
     requiresTarget: true,
 
     canTarget: (gameState, targetInfo) => {

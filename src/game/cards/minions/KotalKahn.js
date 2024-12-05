@@ -8,7 +8,7 @@ export const KotalKahn = {
     baseHealth: 8,
     attributes: ['Healer', 'Warrior'],
     description: 'When summoned: Heal all damaged allies to full health and deal 4 damage to all enemies.',
-    imageUrl: '/images/cards/kotal_kahn.png',
+    imageUrl: 'images/cards/kotal_kahn.png',
 
     battlecry: (gameState) => {
         let newState = { ...gameState };

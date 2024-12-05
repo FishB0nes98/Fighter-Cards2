@@ -8,7 +8,7 @@ export const Yugo = {
     baseHealth: 4,
     attributes: ['Shapeshifter'],
     description: 'Transforms into a wolf after killing an enemy minion.',
-    imageUrl: '/images/cards/yugo_human.png',
+    imageUrl: 'images/cards/yugo_human.png',
     onKill: (gameState, index, playerType) => {
         const newState = { ...gameState };
         const card = newState.players[playerType].board[index];

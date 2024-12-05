@@ -9,7 +9,7 @@ export const Alice = {
     baseAttack: 5,
     attributes: ['Beast', 'Love'],
     description: 'Takes only half damage from all sources.',
-    imageUrl: '/images/cards/alice.png',
+    imageUrl: 'images/cards/alice.png',
 
     // Override damage handling to halve all damage
     onDamaged: function(gameState, damage, index, playerType) {

@@ -8,7 +8,7 @@ export const Morrigan = {
     baseHealth: 6,
     attributes: ['Demon', 'Caster', 'Love'],
     description: 'At the start of your turn, deals 1 damage to a random enemy minion.',
-    imageUrl: '/images/cards/morrigan.png',
+    imageUrl: 'images/cards/morrigan.png',
     onTurnStart: (gameState, index, playerType) => {
         let newState = { ...gameState };
         const opponent = playerType === 'player' ? 'opponent' : 'player';

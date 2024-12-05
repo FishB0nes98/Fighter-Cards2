@@ -8,7 +8,7 @@ export const Birdie = {
     baseHealth: 3,
     attributes: ['Warrior'],
     description: 'When played: Stun an enemy for 2 turns.',
-    imageUrl: '/images/cards/birdie.png',
+    imageUrl: 'images/cards/birdie.png',
 
     battlecry: (gameState) => {
         let newState = { ...gameState };

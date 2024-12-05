@@ -10,7 +10,7 @@ export const Sophitia = {
     baseHealth: 2,
     attributes: ['Warrior'],
     description: 'When destroyed, creates a Sword and Shield in your hand.',
-    imageUrl: '/images/cards/sophitia.png',
+    imageUrl: 'images/cards/sophitia.png',
 
     onDamaged: function(gameState, damage, index, playerType) {
         let newState = { ...gameState };

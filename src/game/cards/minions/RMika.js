@@ -8,7 +8,7 @@ export const RMika = {
     baseHealth: 8,
     attributes: ['Warrior'],
     description: 'Adjacent allies gain +2/+2. Gains +2 attack for each ally on the board.',
-    imageUrl: '/images/cards/R Mika.png',
+    imageUrl: 'images/cards/R Mika.png',
 
     // Called when played or when board state changes
     onPlay: (gameState, index, playerType) => {

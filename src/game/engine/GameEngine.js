@@ -1,4 +1,6 @@
 import { CardLoader } from '../utils/CardLoader.js';
+import { AttributeBonus } from './AttributeBonus.js';
+import { AttributeBonusDisplay } from '../../components/AttributeBonusDisplay.js';
 
 export class GameEngine {
     constructor(playerDeck, opponentDeck) {
@@ -48,9 +50,20 @@ export class GameEngine {
         };
 
         // Draw initial hands
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 5; i++) {
             this.drawCard(this.state.players.player);
             this.drawCard(this.state.players.opponent);
+        }
+
+        // Initialize attribute bonus display after state is fully set up
+        requestAnimationFrame(() => {
+            this.applyAttributeBonuses();
+        });
+
+        // Start continuous attribute bonus checking
+        if (typeof window !== 'undefined') {
+            this.lastBonusState = '';
+            setInterval(() => this.checkAttributeBonuses(), 100);
         }
     }
 
@@ -210,16 +223,19 @@ export class GameEngine {
                 buffs: [] // Initialize buffs array
             };
             
+            // Store base stats before applying any effects
+            minionCard.baseAttack = minionCard.attack;
+            minionCard.baseHealth = minionCard.health;
+
             currentPlayer.board[slotIndex] = minionCard;
 
-            // Check if card is placed on buff field
+            // Apply buffs and effects
             this.applyBuffField(this.state.currentTurn, slotIndex);
-            
-            // Check for and apply any auras from existing minions
             this.checkAndApplyAuras(this.state.currentTurn, slotIndex);
-            
-            // After placing minion, check board effects
             this.checkBoardEffects(this.state.currentTurn, slotIndex);
+            
+            // Apply attribute bonuses after placing minion
+            this.applyAttributeBonuses();
             
             // Trigger onPlay if it exists
             if (minionCard.onPlay) {
@@ -400,6 +416,9 @@ export class GameEngine {
             window.updateUI();
         }
 
+        // After combat resolution
+        this.applyAttributeBonuses();
+
         return true;
     }
 
@@ -563,6 +582,31 @@ export class GameEngine {
         if (typeof window !== 'undefined' && window.updateUI) {
             window.updateUI();
         }
+
+        // Apply attribute bonuses for the new turn
+        this.applyAttributeBonuses();
+
+        // Increment Hunter bonus
+        ['player', 'opponent'].forEach(playerType => {
+            this.state.players[playerType].board.forEach(card => {
+                if (card?.attributes?.includes('Hunter')) {
+                    if (!card.hunterBonusAttack) card.hunterBonusAttack = 0;
+                    card.hunterBonusAttack += 1;
+                    card.attack = card.baseAttack + card.hunterBonusAttack;
+                }
+            });
+        });
+
+        // Reset Healer bonus flags
+        ['player', 'opponent'].forEach(playerType => {
+            this.state.players[playerType].board.forEach(card => {
+                if (card) {
+                    card.hasHealerBonus = false;
+                }
+            });
+        });
+
+        this.checkAttributeBonuses();
     }
 
     // Add this new method to handle target selection
@@ -684,5 +728,398 @@ export class GameEngine {
         if (typeof window !== 'undefined' && window.updateUI) {
             window.updateUI();
         }
+    }
+
+    applyAttributeBonuses() {
+        const newState = { ...this.state };
+        
+        // Apply bonuses for both players
+        ['player', 'opponent'].forEach(playerType => {
+            const board = newState.players[playerType].board;
+            
+            // Reset stats to base values first
+            board.forEach(card => {
+                if (card) {
+                    // Store current buffs before reset
+                    const currentBuffs = card.buffs || [];
+                    
+                    // Initialize buffs if needed
+                    if (!card.buffs) card.buffs = [];
+                    
+                    // Reset attack to base value
+                    if (card.baseAttack !== undefined) {
+                        card.attack = card.baseAttack;
+                    }
+
+                    // Remove old attribute buffs but keep ninja bonus if it should be maintained
+                    card.buffs = card.buffs.filter(buff => 
+                        buff.type === 'NINJA_BONUS' || 
+                        buff.type !== 'ATTRIBUTE'
+                    );
+                    
+                    // Add new attribute buffs
+                    card.buffs.push(...AttributeBonus.getAttributeBuffs(card));
+                }
+            });
+            
+            // Apply warrior bonuses
+            board.forEach((card, index) => {
+                if (card?.attributes?.includes('Warrior')) {
+                    const bonus = AttributeBonus.calculateWarriorBonus(newState, card, playerType);
+                    if (bonus > 0) {
+                        card.attack += bonus;
+                        card.buffs = card.buffs.filter(buff => buff.type !== 'WARRIOR_BONUS');
+                        card.buffs.push({
+                            type: 'WARRIOR_BONUS',
+                            name: 'Warrior Might',
+                            description: `+${bonus} Attack from allies`,
+                            effect: 'attack',
+                            value: bonus,
+                            source: 'warrior-synergy'
+                        });
+                        card.animation = {
+                            isBuffed: true,
+                            effect: 'warrior-power'
+                        };
+                    }
+                }
+            });
+
+            // Apply ninja bonuses
+            board.forEach((card, index) => {
+                if (card?.attributes?.includes('Ninja')) {
+                    const bonus = AttributeBonus.calculateNinjaBonus(newState, card, playerType);
+                    
+                    // Remove ninja bonus if conditions aren't met
+                    if (!bonus.maintainBonus) {
+                        card.buffs = card.buffs.filter(buff => buff.type !== 'NINJA_BONUS');
+                    }
+                    
+                    // Apply new bonus if needed
+                    if (bonus.shouldApply) {
+                        card.attack += bonus.attack;
+                        card.health += bonus.health;
+                        card.buffs.push({
+                            type: 'NINJA_BONUS',
+                            name: 'Ninja Power',
+                            description: 'Stats doubled from Ninja synergy',
+                            effect: 'stats',
+                            value: bonus.attack,
+                            source: 'ninja-synergy'
+                        });
+                        card.animation = {
+                            isBuffed: true,
+                            effect: 'ninja-power'
+                        };
+                    }
+                }
+            });
+
+            // Apply caster bonus to spell costs in hand
+            const casterBonus = AttributeBonus.calculateCasterBonus(newState, playerType);
+            if (casterBonus > 0) {
+                newState.players[playerType].hand.forEach(card => {
+                    if (card.type === 'SPELL') {
+                        // Store original mana cost if not already stored
+                        if (card.originalManaCost === undefined) {
+                            card.originalManaCost = card.manaCost;
+                        }
+                        card.manaCost = Math.max(0, card.originalManaCost - casterBonus);
+                        card.buffs = card.buffs?.filter(buff => buff.type !== 'CASTER_BONUS') || [];
+                        card.buffs.push({
+                            type: 'CASTER_BONUS',
+                            name: 'Spell Discount',
+                            description: `Costs ${casterBonus} less from Caster synergy`,
+                            effect: 'mana',
+                            value: -casterBonus,
+                            source: 'caster-synergy'
+                        });
+                    }
+                });
+            }
+        });
+
+        this.state = newState;
+        AttributeBonusDisplay.update(this.state, this.state.currentTurn);
+    }
+
+    removeCard(playerType, index, reason = 'destroyed') {
+        const card = this.state.players[playerType].board[index];
+        if (!card) return;
+
+        // Trigger any removal effects
+        if (card.onRemove) {
+            this.state = card.onRemove(this.state, index, playerType);
+        }
+
+        // Remove the card
+        this.state.players[playerType].board[index] = null;
+
+        // Check for demon bonus if card was destroyed
+        if (reason === 'destroyed') {
+            const opposingPlayer = playerType === 'player' ? 'opponent' : 'player';
+            if (AttributeBonus.calculateDemonBonus(this.state, opposingPlayer)) {
+                AttributeBonus.applyDemonBonus(this.state, opposingPlayer);
+            }
+        }
+
+        // Recalculate attribute bonuses
+        this.applyAttributeBonuses();
+    }
+
+    static attack(gameState, attackerIndex, defenderInfo) {
+        let newState = { ...gameState };
+        const attacker = newState.players[newState.currentTurn].board[attackerIndex];
+        const defender = newState.players[defenderInfo.playerType].board[defenderInfo.index];
+
+        if (!attacker || !defender) return newState;
+
+        // Apply damage
+        defender.health -= attacker.attack;
+        attacker.health -= defender.attack;
+
+        // Check for deaths
+        if (defender.health <= 0) {
+            newState = this.removeCard(newState, defenderInfo.playerType, defenderInfo.index, 'destroyed');
+        }
+        if (attacker.health <= 0) {
+            newState = this.removeCard(newState, newState.currentTurn, attackerIndex, 'destroyed');
+        }
+
+        // Mark attacker as having attacked
+        if (attacker.health > 0) {
+            attacker.hasAttackedThisTurn = true;
+        }
+
+        return newState;
+    }
+
+    static endTurn(gameState) {
+        let newState = { ...gameState };
+        
+        // Switch current turn
+        newState.currentTurn = newState.currentTurn === 'player' ? 'opponent' : 'player';
+        
+        // Reset all cards' attack status
+        const currentPlayer = newState.players[newState.currentTurn];
+        currentPlayer.board.forEach(card => {
+            if (card) {
+                card.hasAttackedThisTurn = false;
+                if (card.onTurnStart) {
+                    newState = card.onTurnStart(newState, index, newState.currentTurn);
+                }
+            }
+        });
+
+        // Recalculate attribute bonuses for new turn
+        newState = this.applyAttributeBonuses(newState);
+        AttributeBonusDisplay.update(newState, newState.currentTurn);
+        
+        return newState;
+    }
+
+    checkAttributeBonuses() {
+        let newState = { ...this.state };
+        let hasChanges = false;
+
+        // Create a string representation of current board state for comparison
+        const currentBoardState = ['player', 'opponent'].map(playerType => 
+            this.state.players[playerType].board.map(card => 
+                card ? `${card.id}-${card.attack}-${card.health}` : 'empty'
+            ).join(',')
+        ).join(';');
+
+        // Only proceed if board state has changed
+        if (currentBoardState === this.lastBonusState) {
+            return;
+        }
+
+        ['player', 'opponent'].forEach(playerType => {
+            const board = newState.players[playerType].board;
+            
+            // Reset all field cards to base stats first
+            board.forEach(card => {
+                if (card) {
+                    // Store original stats if not set
+                    if (card.baseAttack === undefined) {
+                        card.baseAttack = card.attack;
+                    }
+                    if (card.baseHealth === undefined) {
+                        card.baseHealth = card.health;
+                    }
+
+                    // Reset to base stats if not ninja bonus or hunter bonus
+                    if (!card.hasNinjaBonus) {
+                        if (card.attack !== (card.baseAttack + (card.hunterBonusAttack || 0))) {
+                            card.attack = card.baseAttack + (card.hunterBonusAttack || 0);
+                            hasChanges = true;
+                        }
+                        if (card.health > card.baseHealth) {
+                            card.health = card.baseHealth;
+                            hasChanges = true;
+                        }
+                    }
+
+                    // Remove old attribute buffs except NINJA_BONUS and HUNTER_BONUS
+                    if (card.buffs) {
+                        const oldLength = card.buffs.length;
+                        card.buffs = card.buffs.filter(buff => 
+                            buff.type === 'NINJA_BONUS' || 
+                            buff.type === 'HUNTER_BONUS' ||
+                            !['WARRIOR_BONUS', 'ATTRIBUTE', 'HEALER_BONUS'].includes(buff.type)
+                        );
+                        if (oldLength !== card.buffs.length) hasChanges = true;
+                    }
+                }
+            });
+
+            // Check Ninja conditions first
+            const ninjaCount = board.filter(card => card?.attributes?.includes('Ninja')).length;
+            const shouldHaveNinjaBonus = ninjaCount === 1 || ninjaCount === 6;
+
+            // Apply or remove ninja bonuses
+            board.forEach((card, index) => {
+                if (card?.attributes?.includes('Ninja')) {
+                    if (shouldHaveNinjaBonus && !card.hasNinjaBonus) {
+                        // Apply bonus
+                        card.attack = card.baseAttack * 2;
+                        card.health = card.baseHealth * 2;
+                        card.hasNinjaBonus = true;
+                        
+                        if (!card.buffs) card.buffs = [];
+                        card.buffs.push({
+                            type: 'NINJA_BONUS',
+                            name: 'Ninja Power',
+                            description: 'Stats doubled from Ninja synergy',
+                            effect: 'stats',
+                            value: card.baseAttack,
+                            source: 'ninja-synergy'
+                        });
+                        hasChanges = true;
+                    } else if (!shouldHaveNinjaBonus && card.hasNinjaBonus) {
+                        // Remove bonus
+                        card.attack = card.baseAttack;
+                        card.health = Math.min(card.health, card.baseHealth);
+                        card.hasNinjaBonus = false;
+                        if (card.buffs) {
+                            card.buffs = card.buffs.filter(buff => buff.type !== 'NINJA_BONUS');
+                        }
+                        hasChanges = true;
+                    } else if (shouldHaveNinjaBonus && card.hasNinjaBonus) {
+                        // Ensure bonus is maintained
+                        if (card.attack !== card.baseAttack * 2) {
+                            card.attack = card.baseAttack * 2;
+                            hasChanges = true;
+                        }
+                    }
+                }
+            });
+
+            // Apply warrior bonuses
+            board.forEach((card, index) => {
+                if (card?.attributes?.includes('Warrior')) {
+                    const bonus = AttributeBonus.calculateWarriorBonus(newState, card, playerType);
+                    if (bonus > 0) {
+                        card.attack += bonus;
+                        if (!card.buffs) card.buffs = [];
+                        card.buffs.push({
+                            type: 'WARRIOR_BONUS',
+                            name: 'Warrior Might',
+                            description: `+${bonus} Attack from allies`,
+                            effect: 'attack',
+                            value: bonus,
+                            source: 'warrior-synergy'
+                        });
+                        hasChanges = true;
+                    }
+                }
+            });
+
+            // Apply God cost reduction to hand
+            const godBonus = AttributeBonus.calculateGodBonus(newState, playerType);
+            newState.players[playerType].hand.forEach(card => {
+                const newCost = Math.max(0, card.baseCost || card.cost - godBonus);
+                if (card.cost !== newCost) {
+                    if (card.baseCost === undefined) {
+                        card.baseCost = card.cost;
+                    }
+                    card.cost = newCost;
+                    hasChanges = true;
+                }
+            });
+
+            // Apply Healer bonus
+            const healerBonus = AttributeBonus.calculateHealerBonus(newState, playerType);
+            if (healerBonus.bonus > 0) {
+                const validTargets = board.filter(card => card && !card.hasHealerBonus);
+                if (validTargets.length > 0) {
+                    const targetCount = healerBonus.count === -1 ? validTargets.length : healerBonus.count;
+                    const shuffled = [...validTargets].sort(() => Math.random() - 0.5);
+                    
+                    for (let i = 0; i < Math.min(targetCount, shuffled.length); i++) {
+                        const target = shuffled[i];
+                        target.health += healerBonus.bonus;
+                        target.hasHealerBonus = true;
+                        if (!target.buffs) target.buffs = [];
+                        target.buffs.push({
+                            type: 'HEALER_BONUS',
+                            name: 'Healing Touch',
+                            description: `+${healerBonus.bonus} Health from Healer synergy`,
+                            effect: 'health',
+                            value: healerBonus.bonus,
+                            source: 'healer-synergy'
+                        });
+                        hasChanges = true;
+                    }
+                }
+            }
+
+            // Apply Hunter bonus (increment happens in endTurn)
+            board.forEach(card => {
+                if (card?.attributes?.includes('Hunter')) {
+                    const bonus = AttributeBonus.calculateHunterBonus(card);
+                    if (bonus > 0) {
+                        if (!card.buffs) card.buffs = [];
+                        const existingBuff = card.buffs.find(b => b.type === 'HUNTER_BONUS');
+                        if (!existingBuff) {
+                            card.buffs.push({
+                                type: 'HUNTER_BONUS',
+                                name: 'Hunter\'s Mark',
+                                description: `+${bonus} Attack from Hunter synergy`,
+                                effect: 'attack',
+                                value: bonus,
+                                source: 'hunter-synergy'
+                            });
+                            hasChanges = true;
+                        } else if (existingBuff.value !== bonus) {
+                            existingBuff.value = bonus;
+                            existingBuff.description = `+${bonus} Attack from Hunter synergy`;
+                            hasChanges = true;
+                        }
+                    }
+                }
+            });
+        });
+
+        // Only update state and display if there were changes
+        if (hasChanges) {
+            this.state = newState;
+            this.lastBonusState = currentBoardState;
+            AttributeBonusDisplay.update(this.state, this.state.currentTurn);
+        }
+    }
+
+    onCardAttack(attackingCard, defendingCard) {
+        // ... existing attack code ...
+
+        // Check Primal draw trigger
+        if (attackingCard.attributes?.includes('Primal')) {
+            const playerType = this.getCardOwner(attackingCard);
+            if (AttributeBonus.shouldTriggerPrimalDraw(this.state, playerType)) {
+                this.drawCard(playerType);
+            }
+        }
+
+        // ... rest of attack code ...
     }
 } 

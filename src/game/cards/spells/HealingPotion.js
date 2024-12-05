@@ -4,7 +4,7 @@ export const HealingPotion = {
     type: 'SPELL',
     manaCost: 1,
     description: 'Restore 3 HP to a minion.',
-    imageUrl: '/images/cards/healing_potion.png',
+    imageUrl: 'images/cards/healing_potion.png',
     requiresTarget: true,
 
     canTarget: (gameState, targetInfo) => {

@@ -8,7 +8,7 @@ export const Noel = {
     baseHealth: 3,
     attributes: ['Hunter'],
     description: 'Deals 2 damage to two random opponent minions.',
-    imageUrl: '/images/cards/noel.png',
+    imageUrl: 'images/cards/noel.png',
     battlecry: (gameState) => {
         let newState = { ...gameState };
         const opponentIndex = newState.currentTurn === 'player' ? 'opponent' : 'player';

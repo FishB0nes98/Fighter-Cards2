@@ -10,7 +10,7 @@ export const Akuma = {
     baseHealth: 2,
     attributes: ['Demon', 'Caster'],
     description: 'Creates a Hadoken spell in your hand.',
-    imageUrl: '/images/cards/akuma.png',
+    imageUrl: 'images/cards/akuma.png',
     battlecry: (gameState) => {
         const newState = { ...gameState };
         const currentPlayer = newState.players[newState.currentTurn];

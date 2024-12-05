@@ -8,7 +8,7 @@ export const Shizumaru = {
     baseHealth: 3,
     attributes: ['Warrior', 'Ninja'],
     description: 'Immune to harmful spells.',
-    imageUrl: '/images/cards/shizumaru.png',
+    imageUrl: 'images/cards/shizumaru.png',
 
     // Override onDamaged to handle spell immunity
     onDamaged: (gameState, damage, index, playerType, source) => {

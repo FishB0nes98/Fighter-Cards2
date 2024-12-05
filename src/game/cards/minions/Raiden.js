@@ -8,7 +8,7 @@ export const Raiden = {
     baseHealth: 6,
     attributes: ['Caster', 'God'],
     description: 'When played: Deal 3 damage to 3 random cards. Your spells deal 1 extra damage.',
-    imageUrl: '/images/cards/raiden.png',
+    imageUrl: 'images/cards/raiden.png',
 
     battlecry: (gameState) => {
         let newState = { ...gameState };

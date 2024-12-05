@@ -4,7 +4,7 @@ export const SophitiaSword = {
     type: 'SPELL',
     manaCost: 0,
     description: 'Give a minion +1 attack.',
-    imageUrl: '/images/cards/Sophitia Sword.webp',
+    imageUrl: 'images/cards/Sophitia Sword.webp',
     requiresTarget: true,
 
     canTarget: (gameState, targetInfo) => {

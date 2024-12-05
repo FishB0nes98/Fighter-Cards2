@@ -8,7 +8,7 @@ export const Ibuki = {
     baseHealth: 1,
     attributes: ['Ninja'],
     description: 'Can attack immediately. After attacking, draw a card.',
-    imageUrl: '/images/cards/ibuki.png',
+    imageUrl: 'images/cards/ibuki.png',
     canAttackImmediately: true,
     onAttack: (gameState, attackerIndex, playerType) => {
         const newState = { ...gameState };

@@ -6,7 +6,7 @@ export const DeathNecklace = {
     type: 'SPELL',
     manaCost: 5,
     description: 'Place a Reviving buff on a minion. When it dies, it will be resurrected with base stats.',
-    imageUrl: '/images/cards/death_necklace.png',
+    imageUrl: 'images/cards/death_necklace.png',
     requiresTarget: true,
 
     canTarget: (gameState, targetInfo) => {

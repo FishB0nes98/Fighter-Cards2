@@ -6,8 +6,9 @@ export const Julia = {
     attack: 1,
     health: 1,
     baseHealth: 1,
+    attributes: ['Healer'],
     description: 'When played, increase a random ally minion\'s max HP by 1 (including herself).',
-    imageUrl: '/images/cards/julia.png',
+    imageUrl: 'images/cards/julia.png',
     battlecry: (gameState) => {
         const newState = { ...gameState };
         const currentPlayer = newState.players[newState.currentTurn];

@@ -6,7 +6,7 @@ export const Spellbook = {
     type: 'SPELL',
     manaCost: 1,
     description: 'Create a random spell in your hand and reduce its cost by 1.',
-    imageUrl: '/images/cards/spellbook.png',
+    imageUrl: 'images/cards/spellbook.png',
     requiresTarget: false,
 
     effect: (gameState) => {

@@ -8,7 +8,7 @@ export const Ayane = {
     baseHealth: 2,
     attributes: ['Ninja'],
     description: 'Dies instantly when damaged by any source.',
-    imageUrl: '/images/cards/ayane.png',
+    imageUrl: 'images/cards/ayane.png',
     onDamaged: (gameState, damage, index, playerType) => {
         const newState = { ...gameState };
         const minion = newState.players[playerType].board[index];

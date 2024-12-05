@@ -9,7 +9,7 @@ export const Scorpion = {
     baseAttack: 2,
     attributes: ['Demon', 'Ninja'],
     description: 'Battlecry: Hook the weakest enemy minion to the field and attack it. If it dies, gain +2 attack.',
-    imageUrl: '/images/cards/scorpion.png',
+    imageUrl: 'images/cards/scorpion.png',
 
     battlecry: function(gameState) {
         const newState = { ...gameState };

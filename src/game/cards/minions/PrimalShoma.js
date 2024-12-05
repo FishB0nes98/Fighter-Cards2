@@ -8,5 +8,5 @@ export const PrimalShoma = {
   baseHealth: 3,
   attributes: ['Primal', 'Warrior'],
   description: 'A basic but sturdy primal warrior.',
-  imageUrl: '/images/cards/primal_shoma.png',
+  imageUrl: 'images/cards/primal_shoma.png',
 }; 
